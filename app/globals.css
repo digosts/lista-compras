@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 1.25rem;
+  --radius-sheet: 1.75rem;
+}
+
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --surface-2: #eef1f4;
+  --line: #e2e7ec;
+  --ink: #0e1720;
+  --muted: #67737f;
+  --brand: #10a05a;
+  --brand-strong: #0b8449;
+  --brand-soft: #e4f6ec;
+  --brand-ink: #0a6f3d;
+  --danger: #e0454a;
+  --danger-soft: #fdecec;
+  --warn: #c98207;
+  --warn-soft: #fdf3e2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0f14;
+    --surface: #141b22;
+    --surface-2: #1c242c;
+    --line: #26313b;
+    --ink: #e9eef3;
+    --muted: #93a1ad;
+    --brand: #2fbe77;
+    --brand-strong: #26a967;
+    --brand-soft: #12281e;
+    --brand-ink: #6fdca4;
+    --danger: #f2686c;
+    --danger-soft: #2c1618;
+    --warn: #e0a33a;
+    --warn-soft: #2a2113;
+  }
+}
+
+html {
+  background-color: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  /* Evita o "puxar para recarregar" atrapalhando o modo de compra no celular. */
+  overscroll-behavior-y: none;
+}
+
+/* Nada de seleção acidental ao tocar rápido nos itens durante a compra. */
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-sheet-in {
+  animation: sheet-in 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.25s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheet-in,
+  .animate-fade-in,
+  .animate-pop-in {
+    animation: none;
+  }
+}
