@@ -6,7 +6,7 @@ import { createList, updateList, type ItemInput } from "@/app/actions";
 import { formatQuantity } from "@/lib/format";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 
-const UNITS = ["un", "kg", "g", "L", "ml", "cx", "pct", "dz"] as const;
+const UNITS = ["un", "kg"] as const;
 
 type DraftItem = ItemInput & { key: string };
 
@@ -153,13 +153,13 @@ export function ListForm({
           </div>
 
           {/* Unidades em linha própria: na largura de um celular elas não cabem ao lado do stepper. */}
-          <div className="no-scrollbar -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1">
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
             {UNITS.map((unit) => (
               <button
                 key={unit}
                 type="button"
                 onClick={() => setDraftUnit(unit)}
-                className={`flex-1 shrink-0 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
                   draftUnit === unit ? "bg-brand text-white" : "bg-surface-2 text-muted"
                 }`}
               >

@@ -27,7 +27,7 @@ import {
   TrashIcon,
 } from "@/components/icons";
 
-const UNITS = ["un", "kg", "g", "L", "ml", "cx", "pct", "dz"] as const;
+const UNITS = ["un", "kg"] as const;
 
 function recalc(list: ListDTO): ListDTO {
   const total = round2(
@@ -419,13 +419,13 @@ export function ShoppingScreen({ initialList }: { initialList: ListDTO }) {
             </button>
           </div>
         </div>
-        <div className="no-scrollbar -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1">
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
           {UNITS.map((unit) => (
             <button
               key={unit}
               type="button"
               onClick={() => setNewItem((current) => ({ ...current, unit }))}
-              className={`flex-1 shrink-0 rounded-lg px-2.5 py-2 text-[13px] font-medium ${
+              className={`rounded-lg px-2.5 py-2 text-[13px] font-medium ${
                 newItem.unit === unit ? "bg-brand text-white" : "bg-surface-2 text-muted"
               }`}
             >
