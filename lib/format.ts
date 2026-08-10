@@ -94,3 +94,14 @@ export function formatQuantity(value: number) {
 export function round2(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
+
+/** Meio quilo é uma compra comum; unidade solta só anda de 1 em 1. */
+export function quantityStep(unit: string) {
+  return unit === "kg" ? 0.5 : 1;
+}
+
+/** Encaixa a quantidade no passo da unidade — evita "0,5 un" ao trocar kg → un. */
+export function snapQuantity(value: number, unit: string) {
+  const step = quantityStep(unit);
+  return Math.max(step, round2(Math.round(value / step) * step));
+}

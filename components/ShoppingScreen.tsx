@@ -13,7 +13,14 @@ import {
   startShopping,
 } from "@/app/actions";
 import type { ItemDTO, ListDTO } from "@/lib/lists";
-import { brl, formatDayAndHour, formatQuantity, round2 } from "@/lib/format";
+import {
+  brl,
+  formatDayAndHour,
+  formatQuantity,
+  quantityStep,
+  round2,
+  snapQuantity,
+} from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { PriceSheet } from "@/components/PriceSheet";
 import { Sheet } from "@/components/Sheet";
@@ -395,10 +402,10 @@ export function ShoppingScreen({ initialList }: { initialList: ListDTO }) {
               type="button"
               aria-label="Diminuir quantidade"
               onClick={() =>
-                setNewItem((current) => ({
-                  ...current,
-                  quantity: Math.max(0.25, round2(current.quantity - 1)),
-                }))
+                setNewItem((current) => {
+                  const step = quantityStep(current.unit);
+                  return { ...current, quantity: Math.max(step, round2(current.quantity - step)) };
+                })
               }
               className="grid size-10 place-items-center text-lg font-semibold"
             >
@@ -411,7 +418,10 @@ export function ShoppingScreen({ initialList }: { initialList: ListDTO }) {
               type="button"
               aria-label="Aumentar quantidade"
               onClick={() =>
-                setNewItem((current) => ({ ...current, quantity: round2(current.quantity + 1) }))
+                setNewItem((current) => ({
+                  ...current,
+                  quantity: round2(current.quantity + quantityStep(current.unit)),
+                }))
               }
               className="grid size-10 place-items-center text-lg font-semibold"
             >
@@ -424,7 +434,13 @@ export function ShoppingScreen({ initialList }: { initialList: ListDTO }) {
             <button
               key={unit}
               type="button"
-              onClick={() => setNewItem((current) => ({ ...current, unit }))}
+              onClick={() =>
+                setNewItem((current) => ({
+                  ...current,
+                  unit,
+                  quantity: snapQuantity(current.quantity, unit),
+                }))
+              }
               className={`rounded-lg px-2.5 py-2 text-[13px] font-medium ${
                 newItem.unit === unit ? "bg-brand text-white" : "bg-surface-2 text-muted"
               }`}

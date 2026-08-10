@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createList, updateList, type ItemInput } from "@/app/actions";
-import { formatQuantity } from "@/lib/format";
+import { formatQuantity, quantityStep, round2, snapQuantity } from "@/lib/format";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 
 const UNITS = ["un", "kg"] as const;
@@ -35,6 +35,7 @@ export function ListForm({
   const [draftUnit, setDraftUnit] = useState<string>("un");
   const [error, setError] = useState<string | null>(null);
   const draftRef = useRef<HTMLInputElement>(null);
+  const draftStep = quantityStep(draftUnit);
 
   const addDraft = () => {
     const trimmed = draftName.trim();
@@ -52,13 +53,13 @@ export function ListForm({
     draftRef.current?.focus();
   };
 
-  const changeQuantity = (key: string, delta: number) => {
+  const changeQuantity = (key: string, direction: 1 | -1) => {
     setItems((current) =>
-      current.map((item) =>
-        item.key === key
-          ? { ...item, quantity: Math.max(0.25, Math.round((item.quantity + delta) * 100) / 100) }
-          : item,
-      ),
+      current.map((item) => {
+        if (item.key !== key) return item;
+        const step = quantityStep(item.unit);
+        return { ...item, quantity: Math.max(step, round2(item.quantity + direction * step)) };
+      }),
     );
   };
 
@@ -133,7 +134,7 @@ export function ListForm({
               <button
                 type="button"
                 aria-label="Diminuir quantidade"
-                onClick={() => setDraftQuantity((q) => Math.max(0.25, Math.round((q - 1) * 100) / 100))}
+                onClick={() => setDraftQuantity((q) => Math.max(draftStep, round2(q - draftStep)))}
                 className="grid size-10 place-items-center text-lg font-semibold"
               >
                 −
@@ -144,7 +145,7 @@ export function ListForm({
               <button
                 type="button"
                 aria-label="Aumentar quantidade"
-                onClick={() => setDraftQuantity((q) => Math.round((q + 1) * 100) / 100)}
+                onClick={() => setDraftQuantity((q) => round2(q + draftStep))}
                 className="grid size-10 place-items-center text-lg font-semibold"
               >
                 +
@@ -158,7 +159,10 @@ export function ListForm({
               <button
                 key={unit}
                 type="button"
-                onClick={() => setDraftUnit(unit)}
+                onClick={() => {
+                  setDraftUnit(unit);
+                  setDraftQuantity((q) => snapQuantity(q, unit));
+                }}
                 className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
                   draftUnit === unit ? "bg-brand text-white" : "bg-surface-2 text-muted"
                 }`}
