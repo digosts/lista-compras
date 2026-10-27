@@ -123,3 +123,10 @@ export const AlertIcon = (p: IconProps) => (
     <path d="M12 9.5v4.2M12 16.8h.01" />
   </Base>
 );
+
+export const ChartIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 20.5h16" />
+    <path d="M6.5 16.5v-5M11 16.5V7.5M15.5 16.5v-3.5M20 16.5V5" />
+  </Base>
+);

@@ -37,6 +37,7 @@ function sanitizeItems(items: ItemInput[]) {
 function revalidateAll(id?: string) {
   revalidatePath("/");
   revalidatePath("/finalizadas");
+  revalidatePath("/relatorio");
   if (id) {
     revalidatePath(`/listas/${id}`);
     revalidatePath(`/finalizadas/${id}`);

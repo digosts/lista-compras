@@ -31,7 +31,19 @@ const monthLabel = new Intl.DateTimeFormat(LOCALE, {
   year: "numeric",
 });
 
-const weekdayFull = new Intl.DateTimeFormat(LOCALE, {
+const monthKeyParts = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+});
+
+const monthShortLabel = new Intl.DateTimeFormat(LOCALE, {
+  timeZone: "UTC",
+  month: "short",
+  year: "2-digit",
+});
+
+const weekdayFull =new Intl.DateTimeFormat(LOCALE, {
   timeZone: TIME_ZONE,
   weekday: "long",
   day: "numeric",
@@ -62,6 +74,30 @@ export function formatDayAndHour(iso: string | null) {
 /** "agosto de 2026" — usado para agrupar o histórico. */
 export function formatMonth(iso: string | null) {
   return iso ? monthLabel.format(new Date(iso)) : "Sem data";
+}
+
+/** "2026-08" no fuso do app — chave ordenável para agrupar por mês. */
+export function monthKey(iso: string) {
+  const parts = monthKeyParts.formatToParts(new Date(iso));
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  return `${year}-${month}`;
+}
+
+/** "2026-08" → "ago. 26" */
+export function formatMonthKey(key: string) {
+  const [year, month] = key.split("-").map(Number);
+  return monthShortLabel.format(new Date(Date.UTC(year, month - 1, 15)));
+}
+
+/** "+12,5%" / "−3%" */
+export function formatPercent(value: number) {
+  const formatted = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 }).format(
+    Math.abs(value),
+  );
+  if (value > 0) return `+${formatted}%`;
+  if (value < 0) return `−${formatted}%`;
+  return `${formatted}%`;
 }
 
 /** "sábado, 9 de agosto de 2026" */
@@ -104,4 +140,14 @@ export function quantityStep(unit: string) {
 export function snapQuantity(value: number, unit: string) {
   const step = quantityStep(unit);
   return Math.max(step, round2(Math.round(value / step) * step));
+}
+
+/** "Açúcar  Refinado" e "acucar refinado" são o mesmo produto. */
+export function itemKey(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 }

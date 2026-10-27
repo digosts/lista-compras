@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { ListForm } from "@/components/ListForm";
+import { getItemSuggestions } from "@/lib/reports";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Nova lista",
 };
 
-export default function NovaListaPage() {
+export default async function NovaListaPage() {
+  const suggestions = await getItemSuggestions();
+
   return (
     <>
       <PageHeader
@@ -15,7 +20,7 @@ export default function NovaListaPage() {
         backHref="/"
       />
       <main className="flex-1">
-        <ListForm mode="create" />
+        <ListForm mode="create" suggestions={suggestions} />
       </main>
     </>
   );

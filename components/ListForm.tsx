@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createList, updateList, type ItemInput } from "@/app/actions";
-import { formatQuantity, quantityStep, round2, snapQuantity } from "@/lib/format";
+import { formatQuantity, itemKey, quantityStep, round2, snapQuantity } from "@/lib/format";
+import type { ItemSuggestion } from "@/lib/reports";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 
 const UNITS = ["un", "kg"] as const;
@@ -18,11 +19,14 @@ export function ListForm({
   listId,
   initialName = "",
   initialItems = [],
+  suggestions = [],
 }: {
   mode: "create" | "edit";
   listId?: string;
   initialName?: string;
   initialItems?: ItemInput[];
+  /** Produtos de compras finalizadas, do mais frequente para o menos. */
+  suggestions?: ItemSuggestion[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -36,6 +40,31 @@ export function ListForm({
   const [error, setError] = useState<string | null>(null);
   const draftRef = useRef<HTMLInputElement>(null);
   const draftStep = quantityStep(draftUnit);
+
+  // Some com o que já está na lista e filtra pelo que está sendo digitado.
+  const visibleSuggestions = useMemo(() => {
+    const inList = new Set(items.map((item) => itemKey(item.name)));
+    const query = itemKey(draftName);
+    return suggestions.filter((suggestion) => {
+      const key = itemKey(suggestion.name);
+      return !inList.has(key) && (!query || key.includes(query));
+    });
+  }, [items, draftName, suggestions]);
+
+  /** Um toque adiciona o produto com a quantidade/unidade da última compra. */
+  const addSuggestion = (suggestion: ItemSuggestion) => {
+    setItems((current) => [
+      ...current,
+      {
+        key: nextKey(),
+        name: suggestion.name,
+        quantity: snapQuantity(suggestion.quantity, suggestion.unit),
+        unit: suggestion.unit,
+      },
+    ]);
+    setDraftName("");
+    setError(null);
+  };
 
   const addDraft = () => {
     const trimmed = draftName.trim();
@@ -127,6 +156,39 @@ export function ListForm({
             enterKeyHint="done"
             className="border-line mt-1.5 w-full border-b pb-2 text-[16px] outline-none placeholder:text-[var(--muted)]"
           />
+
+          {suggestions.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-muted text-[12px] font-medium">
+                {draftName.trim() ? "Já comprados com esse nome" : "Já comprados · toque para adicionar"}
+              </p>
+              {visibleSuggestions.length > 0 ? (
+                <div className="mt-1.5 flex max-h-[7.75rem] flex-wrap gap-1.5 overflow-y-auto overscroll-contain">
+
+                  {visibleSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion.name}
+                      type="button"
+                      onClick={() => addSuggestion(suggestion)}
+                      className="border-line bg-surface-2 flex shrink-0 items-center gap-1.5 rounded-full border py-1.5 pr-3 pl-2.5 text-[13px] font-medium transition-transform active:scale-95"
+                    >
+                      <PlusIcon className="text-brand size-3.5 stroke-[2.6]" />
+                      {suggestion.name}
+                      <span className="text-muted text-[11.5px] tabular-nums">
+                        {formatQuantity(suggestion.quantity)} {suggestion.unit}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted mt-1 text-[12.5px]">
+                  {draftName.trim()
+                    ? "Nenhum produto já comprado com esse nome."
+                    : "Todos os produtos já comprados estão na lista."}
+                </p>
+              )}
+            </div>
+          ) : null}
 
           <div className="mt-3 flex items-center justify-between gap-2">
             <span className="text-muted text-[13px]">Quantidade</span>
